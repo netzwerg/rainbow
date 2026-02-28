@@ -1,0 +1,7 @@
+[user]
+	name = Rahel Lüthy
+	email = rahel@hey.com
+[alias]
+	lg = log --graph --pretty=format:'%h -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	st = status
+	ci = commit
