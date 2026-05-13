@@ -51,6 +51,43 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+# - BEGIN selective macstrap port -
+
+# Enable case insensitive path-completion
+zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*'
+
+# Enable partial completion suggestions
+zstyle ':completion:*' list-suffixes
+zstyle ':completion:*' expand prefix suffix
+
+# Export brew environment variables
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Load Homebrew completions
+if type brew &>/dev/null; then
+  FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+  chmod -R go-w "$(brew --prefix)/share"
+fi
+
+# Enable completion system and only evaluate it once a day
+autoload -Uz compinit
+typeset -i updated_at=$(date +'%j' -r ~/.zcompdump 2>/dev/null || stat -f '%Sm' -t '%j' ~/.zcompdump 2>/dev/null)
+if [ $(date +'%j') != $updated_at ]; then
+  compinit -i
+else
+  compinit -C -i
+fi
+
+# Add ASDF to ZSH
+export ASDF_DATA_DIR=~/.asdf
+
+# Source macstrap files -- Rahel removed 'aliases'
+for file in ~/.macstrap/configs/dotfiles/.{exports,extra,path}; do
+	[ -r "$file" ] && [ -f "$file" ] && . "$file";
+done;
+unset file;
+
+# Set JAVA_HOME
+. ~/.asdf/plugins/java/set-java-home.zsh
+
+# - END selective macstrap port -
